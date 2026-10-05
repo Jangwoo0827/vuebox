@@ -15,6 +15,7 @@ import { useWatchTracking } from '@/features/player/useWatchTracking'
 import { PlayerState } from '@/features/player/youtubeApi'
 import { useRelatedVideos } from '@/features/recommendations/useRelatedVideos'
 import { useAuth } from '@/hooks/useAuth'
+import { useImmersiveLandscape } from '@/hooks/useImmersiveLandscape'
 import { useVideos } from '@/hooks/useLibrary'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { usePlaylistItems } from '@/hooks/usePlaylists'
@@ -72,6 +73,7 @@ function WatchView({ videoId }: { videoId: string }) {
   const theater = useUiStore((s) => s.theater)
   const toggleTheater = useUiStore((s) => s.toggleTheater)
   const apiRef = useRef<PlayerApi | null>(null)
+  const immersive = useImmersiveLandscape()
   const listId = params.get('list') ?? undefined
 
   const videoQ = useQuery({
@@ -146,10 +148,10 @@ function WatchView({ videoId }: { videoId: string }) {
   const queueRows = queueVideos.data ?? []
 
   return (
-    <div className={`grid gap-x-6 gap-y-5 lg:grid-rows-[auto_1fr] ${theater ?'lg:grid-cols-[minmax(0,1fr)_380px]' : 'lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_420px]'}`}>
+    <div className={`grid gap-x-6 gap-y-5 lg:grid-rows-[auto_1fr] ${immersive ? 'gap-y-0' : ''} ${theater ?'lg:grid-cols-[minmax(0,1fr)_380px]' : 'lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_420px]'}`}>
       {/* Player: spans the full width in theater mode but is never re-mounted when toggling. */}
-      <div className={theater ? 'lg:col-span-2' : 'lg:col-start-1 lg:row-start-1'}>
-        <div className={theater ? 'mx-auto w-[min(100%,calc((100dvh-var(--topbar-h)-150px)*16/9))]' : ''}>
+      <div className={immersive ? 'bg-black' : theater ? 'lg:col-span-2' : 'lg:col-start-1 lg:row-start-1'}>
+        <div className={immersive ? 'mx-auto w-[min(100%,calc(100dvh*16/9))]' : theater ? 'mx-auto w-[min(100%,calc((100dvh-var(--topbar-h)-150px)*16/9))]' : ''}>
           {video.embeddable ? (
             <PlayerContainer
               videoId={video.id}
@@ -159,6 +161,7 @@ function WatchView({ videoId }: { videoId: string }) {
               enabled={resumeReady}
               theater={theater}
               onToggleTheater={toggleTheater}
+              immersive={immersive}
               apiRef={apiRef}
               onStateChange={onStateChange}
               onReady={onReady}
