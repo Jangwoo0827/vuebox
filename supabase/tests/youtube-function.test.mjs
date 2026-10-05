@@ -35,7 +35,17 @@ before(async () => {
       const items = ids.map((id) => (id === 'BBBBBBBBBBB' ? videoItem(id, { status: { embeddable: true, privacyStatus: 'private' } }) : videoItem(id)))
       return send(200, { items, nextPageToken: undefined })
     }
-    if (path === '/playlistItems') return send(200, { items: [{ contentDetails: { videoId: 'AAAAAAAAAAA', videoPublishedAt: '2026-02-01T00:00:00Z' } }] })
+    if (path === '/playlistItems') {
+      // Full-list requests (maxResults=50) are paged: page 1 → page 2 (token P2) → end.
+      if (url.searchParams.get('maxResults') === '50') {
+        const second = url.searchParams.get('pageToken') === 'P2'
+        return send(200, {
+          items: [{ contentDetails: { videoId: second ? 'CCCCCCCCCCC' : 'AAAAAAAAAAA' } }],
+          nextPageToken: second ? undefined : 'P2',
+        })
+      }
+      return send(200, { items: [{ contentDetails: { videoId: 'AAAAAAAAAAA', videoPublishedAt: '2026-02-01T00:00:00Z' } }] })
+    }
     send(200, { items: [] })
   })
   await new Promise((r) => fake.listen(FAKE_PORT, r))
@@ -127,6 +137,16 @@ test('videos action returns full descriptions only when asked', async () => {
 test('uploads use the uploads playlist (not search)', async () => {
   const { data } = await (await call('uploads', { channelId: 'UC' + 'a'.repeat(22) })).json()
   assert.equal(data.items.length, 1)
+})
+
+test('uploadsAll walks every page, strips descriptions and reports truncation', async () => {
+  const channelId = 'UC' + 'a'.repeat(22)
+  const { data } = await (await call('uploadsAll', { channelId })).json()
+  assert.deepEqual(data.items.map((v) => v.id), ['AAAAAAAAAAA', 'CCCCCCCCCCC'])
+  assert.equal(data.items[0].description, '')
+  assert.equal(data.truncated, false)
+  assert.equal((await call('uploadsAll', { channelId, maxVideos: 10 })).status, 400) // below the allowed range
+  assert.equal((await call('uploadsAll', { channelId: 'nope' })).status, 400)
 })
 
 test('trending degrades gracefully when a chart is unavailable', async () => {

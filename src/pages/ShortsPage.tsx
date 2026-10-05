@@ -5,18 +5,15 @@ import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateViews
 import { PlayerContainer } from '@/features/player/PlayerContainer'
 import type { PlayerApi } from '@/features/player/useYouTubePlayer'
 import { useWatchTracking } from '@/features/player/useWatchTracking'
+import { useShortsFeed } from '@/features/shorts/useShortsFeed'
+import { SHORT_MAX_SECONDS } from '@/constants/video'
 import { useAuth } from '@/hooks/useAuth'
-import { useInfiniteList } from '@/hooks/useInfiniteList'
 import { useVideoToggle } from '@/hooks/useLibrary'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useSettings } from '@/hooks/useSettings'
-import { qk } from '@/lib/queryKeys'
 import { appUrl } from '@/lib/url'
-import { searchVideos } from '@/services/youtubeService'
 import { toast } from '@/stores/toastStore'
 import type { Video } from '@/types/youtube'
-
-const SHORT_MAX_SECONDS = 60
 
 function ShortPlayer({ video }: { video: Video }) {
   const { userId } = useAuth()
@@ -42,11 +39,9 @@ function ShortPlayer({ video }: { video: Video }) {
 
 export default function ShortsPage() {
   usePageTitle('Shorts', '짧은 영상을 연속으로 보세요')
-  const { settings } = useSettings()
-  const region = settings.region
-  // No official "is a Short" flag exists in the API, so this page shows short (<4 min) search results that are ≤ 60 s.
-  const list = useInfiniteList(qk.search('shorts', region), (pageToken) => searchVideos({ q: '#shorts', videoDuration: 'short', regionCode: region, pageToken }))
-  const shorts = list.items.filter((v: Video) => v.durationSeconds > 0 && v.durationSeconds <= SHORT_MAX_SECONDS)
+  // Ranked with the viewer's own history, searches and subscriptions (see useShortsFeed).
+  const list = useShortsFeed()
+  const { shorts } = list
   const [index, setIndex] = useState(0)
   const current = shorts[Math.min(index, Math.max(0, shorts.length - 1))]
 
@@ -76,8 +71,8 @@ export default function ShortsPage() {
     return () => document.removeEventListener('keydown', onKey)
   }, [go])
 
-  if (list.isPending) return <LoadingState label="Shorts를 불러오는 중…" />
-  if (list.isError && shorts.length === 0) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />
+  if (list.loading) return <LoadingState label="Shorts를 불러오는 중…" />
+  if (list.error) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />
   if (!current) return list.hasNextPage ? <LoadingState /> : <EmptyState title="표시할 쇼츠가 없습니다" description="잠시 후 다시 시도해 주세요." />
 
   const share = async () => {
@@ -97,7 +92,7 @@ export default function ShortsPage() {
 
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center gap-3">
-      <p className="text-center text-xs text-text-secondary">길이 {SHORT_MAX_SECONDS}초 이하의 영상 · 방향키 ↑↓ 또는 버튼으로 이동</p>
+      <p className="text-center text-xs text-text-secondary">길이 {SHORT_MAX_SECONDS / 60}분 이하의 영상{list.personalized ? ' · 내 시청 기록·구독을 반영한 추천' : ''} · 방향키 ↑↓ 또는 버튼으로 이동</p>
       <div className="flex w-full items-end justify-center gap-3">
         <div className="min-w-0 max-w-[min(100%,calc((100dvh-var(--topbar-h)-var(--bottomnav-h)-140px)*9/16))] flex-1">
           <ShortPlayer key={current.id} video={current} />

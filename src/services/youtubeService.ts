@@ -79,6 +79,9 @@ export const getVideoCategories = (regionCode: string) => call<{ items: VideoCat
 
 export const getChannelVideos = (p: { channelId: string; pageToken?: string; maxResults?: number }) => call<Page<Video>>('uploads', p)
 
+/** Every upload (up to 2,000, newest first) so the page can sort by views or oldest-first. */
+export const getChannelUploadsAll = (channelId: string) => call<{ items: Video[]; truncated: boolean }>('uploadsAll', { channelId })
+
 export const getChannelPlaylists = (p: { channelId: string; pageToken?: string }) => call<Page<PlaylistSummary>>('channelPlaylists', p)
 
 export const getPlaylistVideos = (p: { playlistId: string; pageToken?: string }) =>

@@ -23,6 +23,7 @@ export const qk = {
   /** Infinite (paged) uploads list on the channel page. A different key from the one above on purpose:
    *  sharing a key between useQuery and useInfiniteQuery corrupts the cache shape. */
   channelUploadsPaged: (id: string) => ['channel-uploads-paged', id] as const,
+  channelUploadsAll: (id: string) => ['channel-uploads-all', id] as const,
   channelPlaylists: (id: string) => ['channel-playlists', id] as const,
   ytPlaylist: (id: string) => ['yt-playlist', id] as const,
   trending: (region: string, cat?: string) => ['trending', region, cat ?? 'all'] as const,

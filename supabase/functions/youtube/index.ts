@@ -108,6 +108,7 @@ const TTL: Record<string, number> = {
   categories: 24 * 3_600_000,
   channels: 60 * 60_000,
   uploads: 15 * 60_000,
+  uploadsAll: 30 * 60_000,
   feed: 10 * 60_000,
   channelPlaylists: 30 * 60_000,
   playlistVideos: 30 * 60_000,
@@ -393,6 +394,39 @@ const actions: Record<string, Handler> = {
     }
     const vids = (res.items ?? []).map((i) => i.contentDetails?.videoId).filter((x): x is string => !!x)
     return { items: (await fetchVideos(vids)).filter((v) => v.embeddable), nextPageToken: res.nextPageToken ?? null }
+  },
+
+  /**
+   * A channel's whole upload list (up to maxVideos, newest first) in one response, so the client can sort
+   * by views or oldest-first — the API only lists uploads newest-first and search.list can't sort ascending.
+   * Costs ~2 quota units per 50 videos (playlistItems + videos), cached for 30 minutes.
+   */
+  async uploadsAll(p) {
+    const channelId = str(p, 'channelId', { re: CHANNEL_ID, required: true })!
+    const maxVideos = int(p, 'maxVideos', 50, 2000, 2000)
+    let count = 0
+    let pageToken: string | undefined
+    let truncated = false
+    // Pipeline: each playlist page's videos.list request starts as soon as that page arrives,
+    // so details are fetched while the next page of ids is still loading.
+    const details: Promise<Video[]>[] = []
+    try {
+      while (count < maxVideos) {
+        const res = await yt('playlistItems', { part: 'contentDetails', playlistId: 'UU' + channelId.slice(2), pageToken, maxResults: '50' })
+        const ids = (res.items ?? []).map((i) => i.contentDetails?.videoId).filter((x): x is string => !!x).slice(0, maxVideos - count)
+        count += ids.length
+        if (ids.length) details.push(fetchVideos(ids))
+        pageToken = res.nextPageToken
+        if (!pageToken) break
+        if (count >= maxVideos) truncated = true
+      }
+    } catch (e) {
+      if (e instanceof HttpError && e.code === 'NOT_FOUND') return { items: [], truncated: false }
+      throw e
+    }
+    const items: Video[] = []
+    for (const list of await Promise.all(details)) for (const v of list) if (v.embeddable) items.push({ ...v, description: '' })
+    return { items, truncated }
   },
 
   /** Latest uploads across many channels in a single call (signed-in users only). */
