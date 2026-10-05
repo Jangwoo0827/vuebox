@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import { useEffect, useRef, type RefObject } from 'react'
+import { useUiStore } from '@/stores/uiStore'
 import { type PlayerApi, type PlayerEvents, useYouTubePlayer } from './useYouTubePlayer'
 import { PLAYER_ERROR_MESSAGES, youtubeWatchUrl } from './youtubeApi'
 import { PlayerControls } from './PlayerControls'
@@ -19,10 +20,14 @@ interface Props extends PlayerEvents {
   hideControls?: boolean
 }
 
+/** Per-device preference (Settings → Playback). Defaults to the privacy-enhanced embed. */
+export const usePrivacyPlayer = () => useUiStore((s) => s.privacyPlayer)
+
 /** Responsive (aspect-ratio based) box that hosts the official YouTube player and its page-level controls. */
 export function PlayerContainer({ videoId, startSeconds, autoplay, playbackRate, enabled, theater, onToggleTheater, apiRef, vertical, hideControls, ...events }: Props) {
   const hostRef = useRef<HTMLDivElement>(null)
-  const { api, ready, state, error, rate } = useYouTubePlayer(hostRef, { videoId, startSeconds, autoplay, playbackRate, enabled, ...events })
+  const privacyMode = usePrivacyPlayer()
+  const { api, ready, state, error, rate } = useYouTubePlayer(hostRef, { videoId, startSeconds, autoplay, playbackRate, enabled, privacyMode, ...events })
   // Expose the imperative API to the page (shortcuts, notes, tracking). Not cleared on unmount:
   // the page's own cleanup effects may still need to read the last position.
   useEffect(() => {

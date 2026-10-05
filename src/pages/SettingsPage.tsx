@@ -15,6 +15,7 @@ import { AUTH_MESSAGES, AuthError, PASSWORD_HINT, isStrongPassword, signOut, upd
 import { clearHistory, clearSearchHistory } from '@/services/historyService'
 import { clearAllUserData, deleteAccount } from '@/services/profileService'
 import { toast } from '@/stores/toastStore'
+import { useUiStore } from '@/stores/uiStore'
 import type { ThemePreference } from '@/types/db'
 
 function Card({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -44,6 +45,8 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const qc = useQueryClient()
   const navigate = useNavigate()
+  const privacyPlayer = useUiStore((s) => s.privacyPlayer)
+  const setPrivacyPlayer = useUiStore((s) => s.setPrivacyPlayer)
 
   const [pw, setPw] = useState({ next: '', confirm: '' })
   const [pwBusy, setPwBusy] = useState(false)
@@ -143,6 +146,12 @@ export default function SettingsPage() {
 
       <Card id="playback" title="Playback">
         <Switch label="Autoplay" description="영상이 끝나면 다음 영상을 자동으로 재생하고, 열 때 바로 재생합니다." checked={settings.autoplay} onChange={(v) => void update({ autoplay: v })} />
+        <Switch
+          label="개인정보 보호 모드 플레이어"
+          description="YouTube 공식 youtube-nocookie.com 임베드를 사용합니다. 재생 전에는 쿠키를 쓰지 않으며 이 기기에만 적용됩니다. 광고가 줄어들 수 있지만 보장되지는 않고, YouTube Premium 로그인 혜택은 적용되지 않을 수 있습니다."
+          checked={privacyPlayer}
+          onChange={setPrivacyPlayer}
+        />
         <div className="flex items-center justify-between gap-3 py-3">
           <p className="font-medium">기본 재생 속도</p>
           <select className="input !w-auto" value={settings.default_playback_rate} onChange={(e) => void update({ default_playback_rate: Number(e.target.value) })} aria-label="기본 재생 속도">

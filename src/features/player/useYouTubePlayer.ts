@@ -39,6 +39,8 @@ interface Options extends PlayerEvents {
   playbackRate?: number
   /** Wait to create the player until this is true (e.g. until resume position is known). */
   enabled?: boolean
+  /** Official privacy-enhanced embed host (youtube-nocookie.com): no cookies until the user plays. */
+  privacyMode?: boolean
 }
 
 /**
@@ -74,6 +76,7 @@ export function useYouTubePlayer(containerRef: RefObject<HTMLDivElement | null>,
         const o = optsRef.current
         playerRef.current = new YT.Player(host, {
           videoId: o.videoId,
+          host: o.privacyMode ? 'https://www.youtube-nocookie.com' : undefined,
           width: '100%',
           height: '100%',
           playerVars: {
