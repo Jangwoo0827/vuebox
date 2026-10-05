@@ -1,0 +1,34 @@
+project_id = "vuebox"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+
+[db]
+port = 54322
+major_version = 17
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/reset-password", "http://localhost:5173/login"]
+enable_signup = true
+minimum_password_length = 8
+password_requirements = "lower_upper_letters_digits"
+
+[auth.email]
+# Turn this on for production so addresses are verified. Local dev signs in immediately.
+enable_confirmations = false
+secure_password_change = true
+
+# The browser calls these with the publishable key and no user JWT for public pages,
+# so JWT verification is off. Each function validates input, rate-limits, and checks the
+# caller's session itself where it matters (feed, delete-account).
+[functions.youtube]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
+
+[storage]
+file_size_limit = "2MiB"

@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+
+/* ---------- Design tokens (dark first) ---------- */
+:root {
+  color-scheme: dark;
+  --background: #0e0f13;
+  --surface: #16181e;
+  --surface-2: #1e2129;
+  --surface-hover: #262a34;
+  --text: #f2f3f7;
+  --text-secondary: #9aa1b1;
+  --border: #2a2e39;
+  --accent: #6d5efc;
+  --accent-hover: #8174ff;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgb(109 94 252 / 0.16);
+  --danger: #ff5c6c;
+  --success: #3ecf8e;
+  --overlay: rgb(0 0 0 / 0.6);
+  --shadow: 0 8px 30px rgb(0 0 0 / 0.45);
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --topbar-h: 56px;
+  --bottomnav-h: 60px;
+  --sidebar-w: 232px;
+  --rail-w: 72px;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --background: #ffffff;
+  --surface: #f6f7fa;
+  --surface-2: #eceef3;
+  --surface-hover: #e3e6ed;
+  --text: #14161c;
+  --text-secondary: #596075;
+  --border: #dfe2ea;
+  --accent: #5b4bdb;
+  --accent-hover: #4a3bc4;
+  --accent-soft: rgb(91 75 219 / 0.12);
+  --danger: #d6293e;
+  --success: #12935a;
+  --overlay: rgb(10 12 20 / 0.45);
+  --shadow: 0 8px 30px rgb(20 22 28 / 0.14);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-hover: var(--surface-hover);
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --font-sans: 'Pretendard Variable', Pretendard, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  /* typography scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+}
+
+/* ---------- Base (in a layer so utilities such as text-accent can override it) ---------- */
+@layer base {
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* Slim scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-hover) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+}
+
+/* ---------- Components ---------- */
+@layer components {
+  .btn {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-transparent px-4 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-accent text-accent-contrast hover:bg-accent-hover;
+  }
+  .btn-secondary {
+    @apply bg-surface-2 text-text hover:bg-surface-hover;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-text hover:bg-surface-hover;
+  }
+  .btn-danger {
+    @apply bg-danger text-white hover:opacity-90;
+  }
+  .btn-active {
+    @apply bg-accent-soft text-accent;
+  }
+  .icon-btn {
+    @apply inline-flex size-10 shrink-0 items-center justify-center rounded-full text-text transition-colors hover:bg-surface-hover disabled:opacity-50;
+  }
+  .input {
+    @apply min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-base text-text placeholder:text-text-secondary focus:border-accent focus:outline-none;
+  }
+  .card {
+    @apply rounded-lg border border-border bg-surface;
+  }
+  .chip {
+    @apply inline-flex min-h-9 items-center whitespace-nowrap rounded-full bg-surface-2 px-3.5 text-sm font-medium text-text transition-colors hover:bg-surface-hover aria-pressed:bg-text aria-pressed:text-background aria-pressed:hover:bg-text;
+  }
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-hover) 37%, var(--surface-2) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--r-sm);
+}
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fade-up {
+  animation: fade-up 0.2s ease-out both;
+}
+
+/* Responsive 16:9 player box — never fixed pixels. */
+.player-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.player-box iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.player-box-vertical {
+  aspect-ratio: 9 / 16;
+  max-height: calc(100dvh - var(--topbar-h) - var(--bottomnav-h) - 24px);
+  width: auto;
+  margin-inline: auto;
+}
+.player-box:fullscreen {
+  border-radius: 0;
+}
+
+.scroll-x {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 4px;
+}
+.scroll-x > * {
+  scroll-snap-align: start;
+}
