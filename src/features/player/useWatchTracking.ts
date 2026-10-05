@@ -50,6 +50,7 @@ export function useWatchTracking({ video, apiRef, userId, saveHistory, existing,
     completed: false,
     startedAt: undefined as string | undefined,
     playLogged: false,
+    hasRow: false, // a history row already holds a real position
     initialisedFor: '',
   })
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -72,6 +73,7 @@ export function useWatchTracking({ video, apiRef, userId, saveHistory, existing,
       completed: existing?.completed ?? false,
       startedAt: existing ? undefined : new Date().toISOString(),
       playLogged: false,
+      hasRow: !!existing,
     })
   }, [video, ready, existing])
 
@@ -94,9 +96,19 @@ export function useWatchTracking({ video, apiRef, userId, saveHistory, existing,
       const now = Date.now()
       if (!opts.force && now - s.lastSaveAt < MIN_GAP_MS) return
 
-      flushWatchTime()
-      const duration = api.getDuration() || v.durationSeconds
-      const progress = opts.ended ? duration : api.getCurrentTime()
+      const playerDuration = api.getDuration()
+      // While an ad plays, the player reports the *ad's* length and position. Never let that overwrite
+      // the real resume position: a duration that doesn't match the video means an ad is on screen.
+      const adPlaying = v.live === 'none' && v.durationSeconds > 0 && playerDuration > 0 && Math.abs(playerDuration - v.durationSeconds) > 3
+      if (adPlaying) {
+        if (s.playingSince) s.playingSince = now // ad time is not watch time
+        if (s.hasRow) return // the saved position stays as it was
+        opts = { ...opts, ended: false } // first visit during an ad: record the video in History at 0:00
+      } else {
+        flushWatchTime()
+      }
+      const duration = adPlaying ? v.durationSeconds : playerDuration || v.durationSeconds
+      const progress = adPlaying ? 0 : opts.ended ? duration : api.getCurrentTime()
       if (!opts.force && Math.abs(progress - s.lastSavedProgress) < 1) return
 
       if (opts.ended) s.completed = true
@@ -112,6 +124,7 @@ export function useWatchTracking({ video, apiRef, userId, saveHistory, existing,
       s.lastSaveAt = now
       s.lastSavedProgress = progress
       if (!uid || !persist) return
+      s.hasRow = true
 
       const snapshot = {
         video: v,
