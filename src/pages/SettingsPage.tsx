@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { ExternalLink, Monitor, Moon, Sun } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -195,6 +195,18 @@ export default function SettingsPage() {
               </option>
             ))}
           </select>
+        </div>
+      </Card>
+
+      <Card id="about" title="About">
+        <div className="flex flex-wrap items-center justify-between gap-3 py-3">
+          <div>
+            <p className="font-medium">소스 코드</p>
+            <p className="text-sm text-text-secondary">VUEBOX의 GitHub 저장소입니다.</p>
+          </div>
+          <a href="https://github.com/Jangwoo0827/vuebox" target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+            <ExternalLink className="size-4" aria-hidden /> GitHub
+          </a>
         </div>
       </Card>
 
