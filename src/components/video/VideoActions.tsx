@@ -1,13 +1,14 @@
 import { Clock, ListPlus, Share2, Star, ThumbsUp } from 'lucide-react'
 import { useState } from 'react'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
+import { appUrl } from '@/lib/url'
 import { useVideoToggle } from '@/hooks/useLibrary'
 import { toast } from '@/stores/toastStore'
 import type { Video } from '@/types/youtube'
 import { SaveToPlaylistModal } from './SaveToPlaylistModal'
 
 async function share(video: Video, seconds: number) {
-  const url = `${window.location.origin}/watch/${video.id}${seconds > 5 ? `?t=${Math.floor(seconds)}` : ''}`
+  const url = appUrl(`watch/${video.id}${seconds > 5 ? `?t=${Math.floor(seconds)}` : ''}`)
   try {
     if (navigator.share) await navigator.share({ title: video.title, url })
     else {

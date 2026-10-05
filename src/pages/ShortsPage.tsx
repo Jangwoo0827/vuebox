@@ -11,6 +11,7 @@ import { useVideoToggle } from '@/hooks/useLibrary'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useSettings } from '@/hooks/useSettings'
 import { qk } from '@/lib/queryKeys'
+import { appUrl } from '@/lib/url'
 import { searchVideos } from '@/services/youtubeService'
 import { toast } from '@/stores/toastStore'
 import type { Video } from '@/types/youtube'
@@ -80,7 +81,7 @@ export default function ShortsPage() {
   if (!current) return list.hasNextPage ? <LoadingState /> : <EmptyState title="표시할 쇼츠가 없습니다" description="잠시 후 다시 시도해 주세요." />
 
   const share = async () => {
-    const url = `${window.location.origin}/watch/${current.id}`
+    const url = appUrl(`watch/${current.id}`)
     try {
       if (navigator.share) await navigator.share({ title: current.title, url })
       else {

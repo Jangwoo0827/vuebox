@@ -1,5 +1,6 @@
 import { AppError } from '@/lib/errors'
 import { supabase } from '@/lib/supabase'
+import { appUrl } from '@/lib/url'
 
 export interface SignUpInput {
   email: string
@@ -75,7 +76,7 @@ export async function signUp(input: SignUpInput): Promise<{ needsConfirmation: b
     password: input.password,
     options: {
       data: { username: input.username.toLowerCase(), display_name: input.displayName.trim() },
-      emailRedirectTo: `${window.location.origin}/login`,
+      emailRedirectTo: appUrl('login'),
     },
   })
   if (error) throw new AuthError(classify(error.message, error.status))
@@ -94,7 +95,7 @@ export async function signOut(): Promise<void> {
 
 /** Official Supabase reset flow: emails a link that returns to /reset-password with a recovery session. */
 export async function requestPasswordReset(email: string): Promise<void> {
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` })
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: appUrl('reset-password') })
   if (error) throw new AuthError(classify(error.message, error.status))
 }
 

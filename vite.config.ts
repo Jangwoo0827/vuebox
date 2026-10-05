@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  // GitHub Pages serves the site from /vuebox/; local dev stays at /.
+  base: process.env.GITHUB_ACTIONS ? '/vuebox/' : '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },

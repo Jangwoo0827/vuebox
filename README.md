@@ -81,7 +81,13 @@ npm run build     # 프로덕션 빌드 (dist/)
 npm run preview   # 빌드 결과 미리보기
 ```
 
-`dist/` 는 정적 파일입니다. Vercel/Netlify/Cloudflare Pages 등에 올리고 **모든 경로를 `index.html` 로 rewrite** (SPA fallback) 하세요. 호스팅 환경변수에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (그리고 선택적으로 `VITE_CONTACT_EMAIL`)를 설정합니다.
+`dist/` 는 정적 파일입니다. **GitHub Pages** 배포는 `.github/workflows/deploy.yml` 이 처리합니다 (`main` 에 푸시하면 타입체크 → 테스트 → 빌드 → 배포, 사이트 주소 `https://<user>.github.io/vuebox/`).
+
+1. 저장소 **Settings → Pages → Source = GitHub Actions**
+2. **Settings → Secrets and variables → Actions → Variables** 에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (선택: `VITE_CONTACT_EMAIL`) 추가 — 공개 값이라 Variables 에 넣어도 됩니다.
+3. Supabase **Authentication → URL Configuration** 에 Pages 주소 추가 (Site URL 과 Redirect URLs `https://<user>.github.io/vuebox/**`).
+
+빌드는 `GITHUB_ACTIONS` 일 때만 `base=/vuebox/` 를 쓰고, `404.html` 로 SPA 새로고침/직접 링크를 처리합니다. 다른 호스팅(Vercel/Netlify 등)은 모든 경로를 `index.html` 로 rewrite 하세요.
 
 ## 환경변수는 어디에 넣나
 

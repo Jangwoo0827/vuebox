@@ -46,7 +46,7 @@ export default function App() {
     <ErrorBoundary>
       <AuthProvider>
         <ThemeSync />
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Suspense fallback={<LoadingState />}>
             <Routes>
               <Route path="/login" element={<LoginPage />} />

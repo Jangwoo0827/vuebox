@@ -12,6 +12,7 @@ import { useVideos } from '@/hooks/useLibrary'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { usePlaylist, usePlaylistActions, usePlaylistItems } from '@/hooks/usePlaylists'
 import { AppError } from '@/lib/errors'
+import { appUrl } from '@/lib/url'
 import { toast } from '@/stores/toastStore'
 import type { PlaylistItemRow } from '@/types/db'
 
@@ -55,7 +56,7 @@ function PlaylistView({ id }: { id: string }) {
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/playlist/${id}`)
+      await navigator.clipboard.writeText(appUrl(`playlist/${id}`))
       toast.success('링크를 복사했습니다.')
     } catch {
       toast.error('링크를 복사하지 못했습니다.')
