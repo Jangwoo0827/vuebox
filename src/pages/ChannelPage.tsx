@@ -44,7 +44,7 @@ function ChannelView({ channelId }: { channelId: string }) {
   usePageTitle(channel?.title, channel?.description.slice(0, 160))
 
   // Videos and Shorts share one uploads query (playlistItems, ~2 quota units per page, never search.list).
-  const uploads = useInfiniteList(qk.channelVideos(channelId), (pageToken) => getChannelVideos({ channelId, pageToken, maxResults: 30 }), tab !== 'playlists')
+  const uploads = useInfiniteList(qk.channelUploadsPaged(channelId), (pageToken) => getChannelVideos({ channelId, pageToken, maxResults: 30 }), tab !== 'playlists')
   const playlists = useInfiniteList(qk.channelPlaylists(channelId), (pageToken) => getChannelPlaylists({ channelId, pageToken }), tab === 'playlists')
 
   if (channelQ.isPending) {

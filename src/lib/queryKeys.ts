@@ -18,7 +18,11 @@ export const qk = {
   videos: (ids: readonly string[]) => ['videos', ...ids] as const,
   video: (id: string) => ['video', id] as const,
   channel: (id: string) => ['channel', id] as const,
+  /** Plain (single page) uploads query, used for related / "because you watched" pools. */
   channelVideos: (id: string) => ['channel-videos', id] as const,
+  /** Infinite (paged) uploads list on the channel page. A different key from the one above on purpose:
+   *  sharing a key between useQuery and useInfiniteQuery corrupts the cache shape. */
+  channelUploadsPaged: (id: string) => ['channel-uploads-paged', id] as const,
   channelPlaylists: (id: string) => ['channel-playlists', id] as const,
   ytPlaylist: (id: string) => ['yt-playlist', id] as const,
   trending: (region: string, cat?: string) => ['trending', region, cat ?? 'all'] as const,
